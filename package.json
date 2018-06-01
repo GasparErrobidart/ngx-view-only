@@ -1,0 +1,37 @@
+{
+  "name": "ngx-view-only",
+  "version": "1.0.0",
+  "description": "Angular version >= 2 module. Render only visible elements of a list.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "Angular",
+    "2",
+    "3",
+    "4",
+    "5",
+    "6",
+    "x",
+    "module",
+    "renderer",
+    "render",
+    "view",
+    "list",
+    "infinite",
+    "scroll"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/GasparErrobidart/ngx-view-only"
+  },
+  "author": "Gaspar Gabriel Errobidart",
+  "license": "MIT",
+  "dependencies": {
+    "@angular/common": "^6.0.3",
+    "@angular/core": "^6.0.3",
+    "rxjs": "^6.2.0",
+    "zone.js": "^0.8.26"
+  }
+}
