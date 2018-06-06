@@ -4,6 +4,7 @@ import { ViewOnlyDirective } from './view-only.directive';
 
 @NgModule({
   imports : [CommonModule],
+  declarations : [ViewOnlyDirective],
   exports : [ViewOnlyDirective]
 })
 

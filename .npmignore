@@ -1,0 +1,7 @@
+src/
+node_modules/
+*.log
+/compiled
+*.ngFactory.ts
+tslint.json
+tsconfig.json
