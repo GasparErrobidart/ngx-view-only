@@ -10,7 +10,9 @@
   "description": "Angular version >= 2 module. Render only visible elements of a list.",
   "main": "dist/bundles/ngx-view-only.umd.js",
   "scripts": {
-    "build": "ng-packagr -p package.json"
+    "clean_modules": "rm -r node_modules",
+    "pack_module": "ng-packagr -p package.json",
+    "build": "npm i && npm run pack_module && npm run clean_modules"
   },
   "keywords": [
     "Angular",
