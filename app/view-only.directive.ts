@@ -101,7 +101,7 @@ export class ViewOnlyDirective {
     return {
       top:     el.getBoundingClientRect().top,
       right:   el.getBoundingClientRect().left + el.offsetWidth,
-      bottom:  el.getBoundingClientRect().top + el.offsetHeight,
+      bottom:  el.getBoundingClientRect().top  + el.offsetHeight,
       left:    el.getBoundingClientRect().left,
       height:  el.offsetHeight,
       width:   el.offsetWidth
