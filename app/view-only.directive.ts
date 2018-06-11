@@ -101,24 +101,14 @@ export class ViewOnlyDirective {
   }
 
   isInView(element : any){
-    let boundries = this.getElementBoundries(element)
-    console.log("Boundries",boundries)
-    let verticalVisibility = boundries.bottom >= this.view.top && boundries.top <= this.view.bottom
-    let horizontalVisibility = boundries.right >= this.view.left && boundries.left <= this.view.right
+    let boundries = element.getBoundingClientRect()
+    // console.log("Boundries",boundries)
+    let verticalVisibility = boundries.bottom >= 0 && boundries.bottom <= this.view.height+element.offsetHeight
+    let horizontalVisibility = boundries.right >= 0 && boundries.right <= this.view.width+element.offsetWidth
     console.log("Vertical",verticalVisibility,"Horizontal",horizontalVisibility)
     return verticalVisibility && horizontalVisibility
   }
 
-  getElementBoundries(element : any){
-    return {
-      top:     element.getBoundingClientRect().top,
-      right:   element.getBoundingClientRect().left + element.offsetWidth,
-      bottom:  element.getBoundingClientRect().top  + element.offsetHeight,
-      left:    element.getBoundingClientRect().left,
-      height:  element.offsetHeight,
-      width:   element.offsetWidth
-    }
-  }
 
   selectElementsInView(){
     if(this.elements && this.elements.length > 0){
