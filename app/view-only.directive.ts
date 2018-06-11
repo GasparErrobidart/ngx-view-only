@@ -17,11 +17,13 @@ export class ViewOnlyDirective {
   before : ElementRef
   after  : ElementRef
   itemCount : number = 1
-  inView : any
+  inView : any = []
   window : any = false
   body : any
   html : any
   view : any
+  start : number
+  end : number
   documentHeight : number
   _incrementCountTimeout : any
   DOMElements : any[]
@@ -35,7 +37,6 @@ export class ViewOnlyDirective {
       this.window = window
       this.body = document.body
       this.html = document.documentElement
-      console.log("Directive Ready")
     }
   }
 
@@ -43,11 +44,11 @@ export class ViewOnlyDirective {
   main(){
     if(this.window){
       this.calculateView()
-      console.log("[ViewOnly] View:",this.view)
       this.calculateDocumentHeight()
       this.incrementItemCount()
       this.updateDOMElements()
       this.visibilityCheck()
+      this.selectElementsInView()
       this.transmit()
     }
   }
@@ -70,41 +71,61 @@ export class ViewOnlyDirective {
 
   incrementItemCount(){
     clearTimeout(this._incrementCountTimeout)
-    let offsetToBottom = this.view.height * 1.7
+    let offsetToBottom = this.view.height * 1.0
     if(this.view.bottom >= this.documentHeight - offsetToBottom && this.itemCount <= this.elements.length){
       this.itemCount += 1
-      this._incrementCountTimeout = setTimeout(()=>this.incrementItemCount(),100)
+      this._incrementCountTimeout = setTimeout(()=>this.main(),100)
     }
   }
 
   updateDOMElements(){
-    this.DOMElements = this.list.nativeElement.children
+    this.DOMElements = Array.from(this.list.nativeElement.children)
   }
 
   visibilityCheck(){
-    this.DOMElements.forEach((el)=>{
-      if(!this.isInView(el)){
-
+    this.DOMElements.forEach((el,i)=>{
+      if(this.isInView(el)){
+        console.log("Element in view",i)
+        if(i < this.start) this.start = i
+        if(i > this.end) this.end = i
       }
     })
   }
 
-  isInView(element : ElementRef){
+  ngOnChanges(sch){
+    if(sch.hasOwnProperty("elements")){
+      this.start=this.elements.length
+      this.end=0
+      this.main()
+    }
+  }
+
+  isInView(element : any){
     let boundries = this.getElementBoundries(element)
-    let verticalVisibility = boundries.top > this.view.bottom || boundries.bottom < this.view.top
-    let horizontalVisibility = boundries.left > this.view.right || boundries.right < this.view.left
+    console.log("Boundries",boundries)
+    let verticalVisibility = boundries.bottom >= this.view.top && boundries.top <= this.view.bottom
+    let horizontalVisibility = boundries.right >= this.view.left && boundries.left <= this.view.right
+    console.log("Vertical",verticalVisibility,"Horizontal",horizontalVisibility)
     return verticalVisibility && horizontalVisibility
   }
 
-  getElementBoundries(element : ElementRef){
-    let el = element.nativeElement
+  getElementBoundries(element : any){
     return {
-      top:     el.getBoundingClientRect().top,
-      right:   el.getBoundingClientRect().left + el.offsetWidth,
-      bottom:  el.getBoundingClientRect().top  + el.offsetHeight,
-      left:    el.getBoundingClientRect().left,
-      height:  el.offsetHeight,
-      width:   el.offsetWidth
+      top:     element.getBoundingClientRect().top,
+      right:   element.getBoundingClientRect().left + element.offsetWidth,
+      bottom:  element.getBoundingClientRect().top  + element.offsetHeight,
+      left:    element.getBoundingClientRect().left,
+      height:  element.offsetHeight,
+      width:   element.offsetWidth
+    }
+  }
+
+  selectElementsInView(){
+    if(this.elements && this.elements.length > 0){
+      let min = (this.DOMElements.length > 0) ? this.start : this.start = 0
+      let max = (this.DOMElements.length > 0) ? this.itemCount : this.itemCount
+      this.inView = this.elements.slice(min,max+1)
+      console.log("[ViewOnly] \nmin:",min,"max:",max,"itemCount:",this.itemCount,"start:",this.start,"end:",this.end)
     }
   }
 
