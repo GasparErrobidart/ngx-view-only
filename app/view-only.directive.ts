@@ -20,27 +20,30 @@ export class ViewOnlyDirective {
   inView : any
   window : any = false
   body : any
+  html : any
   view : any
   documentHeight : number
   _incrementCountTimeout : any
   DOMElements : any[]
   @Input() elements : any
-  @Output() update : EventEmitter = new EventEmitter()
+  @Output() update = new EventEmitter()
 
   constructor(
-    @Inject(DOCUMENT) private document: Document,
     private list : ElementRef
   ){
-    if(window) this.window = window
-    this.body = this.document.body
-    this.html = this.document.documentElement
-    console.log("Directive Ready")
+    if(window){
+      this.window = window
+      this.body = document.body
+      this.html = document.documentElement
+      console.log("Directive Ready")
+    }
   }
 
   @HostListener("window:scroll", ['$event'])
   main(){
     if(this.window){
       this.calculateView()
+      console.log("[ViewOnly] View:",this.view)
       this.calculateDocumentHeight()
       this.incrementItemCount()
       this.updateDOMElements()
@@ -81,13 +84,13 @@ export class ViewOnlyDirective {
   visibilityCheck(){
     this.DOMElements.forEach((el)=>{
       if(!this.isInView(el)){
-        
+
       }
     })
   }
 
   isInView(element : ElementRef){
-    let boundires = this.getElementBoundries(element)
+    let boundries = this.getElementBoundries(element)
     let verticalVisibility = boundries.top > this.view.bottom || boundries.bottom < this.view.top
     let horizontalVisibility = boundries.left > this.view.right || boundries.right < this.view.left
     return verticalVisibility && horizontalVisibility
