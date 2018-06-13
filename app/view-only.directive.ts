@@ -29,6 +29,7 @@ export class ViewOnlyDirective {
   _incrementCountTimeout : any
   DOMElements : any[]
   OOVElements : any[]
+  virtualElements : any
   @Input() elements : any
   @Output() update = new EventEmitter()
 
@@ -56,11 +57,7 @@ export class ViewOnlyDirective {
       this.before = document.getElementById('ngx-view-only-before')
       this.after = document.getElementById('ngx-view-only-after')
 
-      this.before.style.width = "100%"
-      this.after.style.width = "100%"
-
-      this.before.style.height = "1500px"
-      this.after.style.height = "1500px"
+      this.virtualElements = { before : [] , after : [] }
 
     }
   }
