@@ -15,8 +15,8 @@ import {
 
 export class ViewOnlyDirective {
 
-  before : Element
-  after  : Element
+  before : any
+  after  : any
   itemCount : number = 1
   inView : any = []
   window : any = false
@@ -28,6 +28,7 @@ export class ViewOnlyDirective {
   documentHeight : number
   _incrementCountTimeout : any
   DOMElements : any[]
+  OOVElements : any[]
   @Input() elements : any
   @Output() update = new EventEmitter()
 
@@ -54,6 +55,13 @@ export class ViewOnlyDirective {
       this.list.nativeElement.insertBefore(before,this.list.nativeElement.firstChild)
       this.before = document.getElementById('ngx-view-only-before')
       this.after = document.getElementById('ngx-view-only-after')
+
+      this.before.style.width = "100%"
+      this.after.style.width = "100%"
+
+      this.before.style.height = "1500px"
+      this.after.style.height = "1500px"
+
     }
   }
 
@@ -102,9 +110,11 @@ export class ViewOnlyDirective {
 
   visibilityCheck(){
     this.DOMElements.forEach((el,i)=>{
-      if(this.isInView(el)){
+      if(this.isInView(el).visible){
         if(i < this.start) this.start = i
         if(i > this.end) this.end = i
+      }else{
+        this.OOVElements.push(el)
       }
     })
   }
@@ -118,11 +128,32 @@ export class ViewOnlyDirective {
   }
 
   isInView(element : any){
-    let boundries = element.getBoundingClientRect()
-    // console.log("Boundries",boundries)
-    let verticalVisibility = boundries.bottom >= 0 && boundries.bottom <= this.view.height+element.offsetHeight
-    let horizontalVisibility = boundries.right >= 0 && boundries.right <= this.view.width+element.offsetWidth
-    return verticalVisibility && horizontalVisibility
+
+    let verticalVisibility, horizontalVisibility, boundries = element.getBoundingClientRect()
+
+    if(boundries.bottom >= 0 && boundries.bottom <= this.view.height+element.offsetHeight){
+      verticalVisibility = "isAtCenter"
+    }else if(boundries.bottom >= 0){
+      verticalVisibility = "isBeneath"
+    }else if(boundries.bottom < 0){
+      verticalVisibility = "isAbove"
+    }
+
+    if(boundries.right >= 0 && boundries.right <= this.view.width+element.offsetWidth){
+      horizontalVisibility = "isAtCenter"
+    }else if(boundries.right >= 0){
+      horizontalVisibility = "isNext"
+    }else if(boundries.right < 0){
+      horizontalVisibility = "isBefore"
+    }
+
+    let result = {
+      horizontal : horizontalVisibility,
+      vertical : verticalVisibility,
+      visible : horizontalVisibility=="isAtCenter" && verticalVisibility=="isAtCenter"
+    }
+
+    return result
   }
 
 
@@ -132,6 +163,11 @@ export class ViewOnlyDirective {
       let max = (this.DOMElements.length > 0) ? this.itemCount : this.itemCount
       this.inView = this.elements.slice(min,max+1)
       console.log("[ViewOnly] \nmin:",min,"max:",max,"itemCount:",this.itemCount,"start:",this.start,"end:",this.end)
+
+      // REPLACE ELEMENTS OUT OF VIEW WITH PADDING
+
+
+
     }
   }
 
