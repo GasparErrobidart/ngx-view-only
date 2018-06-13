@@ -5,7 +5,8 @@ import {
   HostListener,
   EventEmitter,
   Output,
-  Input
+  Input,
+  Renderer2
 } from '@angular/core'
 
 @Directive({
@@ -14,8 +15,8 @@ import {
 
 export class ViewOnlyDirective {
 
-  before : ElementRef
-  after  : ElementRef
+  before : Element
+  after  : Element
   itemCount : number = 1
   inView : any = []
   window : any = false
@@ -31,12 +32,28 @@ export class ViewOnlyDirective {
   @Output() update = new EventEmitter()
 
   constructor(
-    private list : ElementRef
+    private list : ElementRef,
+    private renderer : Renderer2
   ){
     if(window){
       this.window = window
       this.body = document.body
       this.html = document.documentElement
+    }
+  }
+
+  ngOnInit(){
+    if(window){
+      const before = document.createElement('div')
+      const after = document.createElement('div')
+
+      this.renderer.setProperty(before, 'id', 'ngx-view-only-before')
+      this.renderer.setProperty(after, 'id', 'ngx-view-only-after')
+
+      this.list.nativeElement.appendChild(after)
+      this.list.nativeElement.insertBefore(before,this.list.nativeElement.firstChild)
+      this.before = document.getElementById('ngx-view-only-before')
+      this.after = document.getElementById('ngx-view-only-after')
     }
   }
 
@@ -49,6 +66,7 @@ export class ViewOnlyDirective {
       this.updateDOMElements()
       this.visibilityCheck()
       this.selectElementsInView()
+      this.calculatePadding()
       this.transmit()
     }
   }
@@ -85,7 +103,6 @@ export class ViewOnlyDirective {
   visibilityCheck(){
     this.DOMElements.forEach((el,i)=>{
       if(this.isInView(el)){
-        console.log("Element in view",i)
         if(i < this.start) this.start = i
         if(i > this.end) this.end = i
       }
@@ -105,7 +122,6 @@ export class ViewOnlyDirective {
     // console.log("Boundries",boundries)
     let verticalVisibility = boundries.bottom >= 0 && boundries.bottom <= this.view.height+element.offsetHeight
     let horizontalVisibility = boundries.right >= 0 && boundries.right <= this.view.width+element.offsetWidth
-    console.log("Vertical",verticalVisibility,"Horizontal",horizontalVisibility)
     return verticalVisibility && horizontalVisibility
   }
 
@@ -117,6 +133,10 @@ export class ViewOnlyDirective {
       this.inView = this.elements.slice(min,max+1)
       console.log("[ViewOnly] \nmin:",min,"max:",max,"itemCount:",this.itemCount,"start:",this.start,"end:",this.end)
     }
+  }
+
+  calculatePadding(){
+
   }
 
   transmit(){
