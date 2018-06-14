@@ -113,9 +113,9 @@ export class ViewOnlyDirective {
     this.DOMElements.forEach((el,i)=>{
       let visibility = this.isInView(el)
       if(visibility.vertical == "isAbove"){
-        this.virtualElements.before.push({ el, i })
+        this.virtualElements.before.push({ el, i , boundries : visibility.boundries })
       }else if(visibility.visible){
-        this.virtualElements.visible.push({el,i})
+        this.virtualElements.visible.push({el,i , boundries : visibility.boundries})
       }
     })
   }
@@ -151,7 +151,8 @@ export class ViewOnlyDirective {
     let result = {
       horizontal : horizontalVisibility,
       vertical : verticalVisibility,
-      visible : horizontalVisibility=="isAtCenter" && verticalVisibility=="isAtCenter"
+      visible : horizontalVisibility=="isAtCenter" && verticalVisibility=="isAtCenter",
+      boundries : boundries
     }
 
     return result
@@ -179,9 +180,11 @@ export class ViewOnlyDirective {
   }
 
   calculatePadding(){
-    // let height = 0
-    // this.virtualElements.before.forEach(el=> height += parseInt(el.el.style.height.replace('px','')))
-    // this.before.style.height = this.virtualElements.before
+    if(this.before.length > 0){
+      let newHeight = (this.before[0].boundries.height * Math.ceil(this.virtualElements.before.length/3)) + "px"
+      console.log("New height",newHeight)
+      this.before.style.height = newHeight
+    }
   }
 
   transmit(){
