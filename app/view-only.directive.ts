@@ -57,7 +57,10 @@ export class ViewOnlyDirective {
       this.before = document.getElementById('ngx-view-only-before')
       this.after = document.getElementById('ngx-view-only-after')
 
-      this.virtualElements = { before : [] , after : [] }
+      this.before.style.width = "100%"
+      this.after.style.width = "100%"
+
+      this.virtualElements = { before : [] , visible : [] , after : [] }
 
     }
   }
@@ -69,7 +72,7 @@ export class ViewOnlyDirective {
       this.calculateDocumentHeight()
       this.incrementItemCount()
       this.updateDOMElements()
-      this.visibilityCheck()
+      this.updateVirtualElements()
       this.selectElementsInView()
       this.calculatePadding()
       this.transmit()
@@ -97,6 +100,7 @@ export class ViewOnlyDirective {
     let offsetToBottom = this.view.height * 1.0
     if(this.view.bottom >= this.documentHeight - offsetToBottom && this.itemCount <= this.elements.length){
       this.itemCount += 1
+      this.inView.push(this.elements[this.itemCount-1])
       this._incrementCountTimeout = setTimeout(()=>this.main(),100)
     }
   }
@@ -105,13 +109,13 @@ export class ViewOnlyDirective {
     this.DOMElements = Array.from(this.list.nativeElement.children)
   }
 
-  visibilityCheck(){
+  updateVirtualElements(){
     this.DOMElements.forEach((el,i)=>{
-      if(this.isInView(el).visible){
-        if(i < this.start) this.start = i
-        if(i > this.end) this.end = i
-      }else{
-        this.OOVElements.push(el)
+      let visibility = this.isInView(el)
+      if(visibility.vertical == "isAbove"){
+        this.virtualElements.before.push({ el, i })
+      }else if(visibility.visible){
+        this.virtualElements.visible.push({el,i})
       }
     })
   }
@@ -151,29 +155,37 @@ export class ViewOnlyDirective {
     }
 
     return result
+
   }
 
 
   selectElementsInView(){
-    if(this.elements && this.elements.length > 0){
-      let min = (this.DOMElements.length > 0) ? this.start : this.start = 0
-      let max = (this.DOMElements.length > 0) ? this.itemCount : this.itemCount
-      this.inView = this.elements.slice(min,max+1)
-      console.log("[ViewOnly] \nmin:",min,"max:",max,"itemCount:",this.itemCount,"start:",this.start,"end:",this.end)
+    // if(this.elements && this.elements.length > 0){
+    //   let min = (this.DOMElements.length > 0) ? this.start : this.start = 0
+    //   let max = (this.DOMElements.length > 0) ? this.itemCount : this.itemCount
+    //   this.inView = this.elements.slice(min,max+1)
+    //   console.log("[ViewOnly] \nmin:",min,"max:",max,"itemCount:",this.itemCount,"start:",this.start,"end:",this.end)
+    //
+    //   // REPLACE ELEMENTS OUT OF VIEW WITH PADDING
+    //
+    //   // BEFORE HEIGHT += VIRTUAL.ELEMENTS.BEFORE.EACH.HEIGHT
+    //   // AFTER HEIGHT += VIRTUAL.ELEMENTS.AFTER.EACH.HEIGHT
+    //
+    //
+    //
+    //
+    // }
 
-      // REPLACE ELEMENTS OUT OF VIEW WITH PADDING
-
-
-
-    }
   }
 
   calculatePadding(){
-
+    // let height = 0
+    // this.virtualElements.before.forEach(el=> height += parseInt(el.el.style.height.replace('px','')))
+    // this.before.style.height = this.virtualElements.before
   }
 
   transmit(){
-    this.update.emit(this.inView)
+    this.update.emit(this.inView.slice(this.virtualElements.before.length,this.inView.length - this.virtualElements.before.length))
   }
 
 
