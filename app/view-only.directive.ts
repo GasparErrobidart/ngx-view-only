@@ -74,8 +74,8 @@ export class ViewOnlyDirective {
       this.updateDOMElements()
       this.updateVirtualElements()
       this.selectElementsInView()
-      this.calculatePadding()
       this.transmit()
+      this.calculatePadding()
     }
   }
 
@@ -109,16 +109,7 @@ export class ViewOnlyDirective {
     this.DOMElements = Array.from(this.list.nativeElement.children)
   }
 
-  updateVirtualElements(){
-    this.DOMElements.forEach((el,i)=>{
-      let visibility = this.isInView(el)
-      if(visibility.vertical == "isAbove"){
-        this.virtualElements.before.push({ el, i , boundries : visibility.boundries })
-      }else if(visibility.visible){
-        this.virtualElements.visible.push({el,i , boundries : visibility.boundries})
-      }
-    })
-  }
+
 
   ngOnChanges(sch){
     if(sch.hasOwnProperty("elements")){
@@ -179,11 +170,38 @@ export class ViewOnlyDirective {
 
   }
 
+  updateVirtualElements(){
+    this.DOMElements.slice(1,this.DOMElements.length-1).forEach((el,i)=>{
+      // console.log("DOM ELEMENTS",i,el)
+      let visibility = this.isInView(el)
+      if(visibility.vertical == "isAbove"){
+        if(!(this.virtualElements.before.find(el => el.i == i))) this.virtualElements.before.push({ el, i , boundries : visibility.boundries })
+        if(this.virtualElements.after.length > 0) this.virtualElements.after.splice(this.virtualElements.before-1,1);
+      }else if(visibility.vertical == "isBeneath"){
+        if(this.virtualElements.before.length > 0) this.virtualElements.before.splice(this.virtualElements.before-1,1);
+        if(!(this.virtualElements.after.find(el => el.i == i))) this.virtualElements.after.push({ el, i , boundries : visibility.boundries });
+      }else if(visibility.visible){
+        this.virtualElements.visible.push({el,i , boundries : visibility.boundries})
+      }
+    })
+  }
+
   calculatePadding(){
-    if(this.before.length > 0){
-      let newHeight = (this.before[0].boundries.height * Math.ceil(this.virtualElements.before.length/3)) + "px"
-      console.log("New height",newHeight)
+    if(this.virtualElements.before.length > 0){
+      // console.log("DOME ELEMENTS:",this.DOMElements)
+      console.log("Virtual Elements:",this.virtualElements)
+      console.log(this.DOMElements.slice(1,this.DOMElements.length-1))
+      // console.log("Height", this.virtualElements.before , "Virtual elements before:",this.virtualElements.before.length)
+      let newHeight = (this.virtualElements.before[0].boundries.height * Math.ceil(this.virtualElements.before.length/3)) + "px"
+      // console.log("New height",newHeight)
       this.before.style.height = newHeight
+    }
+    if(this.virtualElements.after.length > 0){
+      console.log("DOME ELEMENTS:",this.DOMElements)
+      console.log("Height", this.virtualElements.after , "Virtual elements before:",this.virtualElements.after.length)
+      let newHeight = (this.virtualElements.after[0].boundries.height * Math.ceil(this.virtualElements.after.length/3)) + "px"
+      console.log("New height",newHeight)
+      this.after.style.height = newHeight
     }
   }
 
