@@ -25,11 +25,12 @@ export class ViewOnlyDirective {
   view : any
   start : number
   end : number
+  ready : boolean = false
   documentHeight : number
   _incrementCountTimeout : any
   DOMElements : any[]
   OOVElements : any[]
-  virtualElements : any
+  virtualElements : any = { before : [] , visible : [] , after : [] }
   @Input() elements : any
   @Output() update = new EventEmitter()
 
@@ -60,7 +61,9 @@ export class ViewOnlyDirective {
       this.before.style.width = "100%"
       this.after.style.width = "100%"
 
-      this.virtualElements = { before : [] , visible : [] , after : [] }
+
+      this.main()
+      this.ready = true
 
     }
   }
@@ -70,7 +73,7 @@ export class ViewOnlyDirective {
     if(this.window){
       this.calculateView()
       this.calculateDocumentHeight()
-      this.incrementItemCount()
+      // this.incrementItemCount()
       this.updateDOMElements()
       this.updateVirtualElements()
       this.selectElementsInView()
@@ -96,8 +99,9 @@ export class ViewOnlyDirective {
   }
 
   incrementItemCount(){
+    console.log("DOCUMENT HEIGHT:",this.documentHeight,"VIEW BOTTOM:",this.view.bottom)
     clearTimeout(this._incrementCountTimeout)
-    let offsetToBottom = this.view.height * 1.0
+    let offsetToBottom = this.view.height * 0.1
     if(this.view.bottom >= this.documentHeight - offsetToBottom && this.itemCount <= this.elements.length){
       this.itemCount += 1
       this.inView.push(this.elements[this.itemCount-1])
@@ -115,7 +119,7 @@ export class ViewOnlyDirective {
     if(sch.hasOwnProperty("elements")){
       this.start=this.elements.length
       this.end=0
-      this.main()
+      if(this.ready) this.main()
     }
   }
 
@@ -167,46 +171,90 @@ export class ViewOnlyDirective {
     //
     //
     // }
-
   }
 
   updateVirtualElements(){
+    clearTimeout(this._incrementCountTimeout)
+    this.virtualElements.visible = []
     this.DOMElements.slice(1,this.DOMElements.length-1).forEach((el,i)=>{
-      // console.log("DOM ELEMENTS",i,el)
       let visibility = this.isInView(el)
       if(visibility.vertical == "isAbove"){
         if(!(this.virtualElements.before.find(el => el.i == i))) this.virtualElements.before.push({ el, i , boundries : visibility.boundries })
-        if(this.virtualElements.after.length > 0) this.virtualElements.after.splice(this.virtualElements.before-1,1);
+
+        let found = false;
+        this.virtualElements.visible.find(el,index =>{
+          if(el.i == i) found = index
+        })
+        if(found) this.virtualElements.visible.splice(found,1)
+
       }else if(visibility.vertical == "isBeneath"){
-        if(this.virtualElements.before.length > 0) this.virtualElements.before.splice(this.virtualElements.before-1,1);
-        if(!(this.virtualElements.after.find(el => el.i == i))) this.virtualElements.after.push({ el, i , boundries : visibility.boundries });
+        if(!(this.virtualElements.after.find(el => el.i == i))) this.virtualElements.after.push({ el, i , boundries : visibility.boundries })
+
+        let found = false;
+        this.virtualElements.visible.find(el,index =>{
+          if(el.i == i) found = index
+        })
+        if(found) this.virtualElements.visible.splice(found,1)
+
       }else if(visibility.visible){
         this.virtualElements.visible.push({el,i , boundries : visibility.boundries})
       }
     })
+
+    let beforeVisibility = this.isInView(this.before)
+    let afterVisibility = this.isInView(this.after)
+
+    if(beforeVisibility.visible && this.virtualElements.before.length > 0){
+      this.virtualElements.before.splice(this.virtualElements.before-3,3)
+        .forEach(el => this.virtualElements.visible.unshift(el))
+    }
+
+
+
+    if(afterVisibility.boundries.top > -100){
+      console.log("AFTER VISIBLE")
+      if(this.virtualElements.after.length > 0){
+        this.virtualElements.after.splice(this.virtualElements.after-3,3)
+          .forEach(el => this.virtualElements.visible.push(el))
+      }else{
+        console.log("ITEM COUNT",this.itemCount)
+        this.itemCount += 1
+        this.inView.push(this.elements[this.itemCount-1])
+        this._incrementCountTimeout = setTimeout(()=>this.main(),100)
+      }
+    }
+
+
   }
 
   calculatePadding(){
+    console.log("Virtual elements",this.virtualElements)
+    let newHeightBefore = 0 + "px"
+    // console.log("New height",newHeight)
+
     if(this.virtualElements.before.length > 0){
       // console.log("DOME ELEMENTS:",this.DOMElements)
-      console.log("Virtual Elements:",this.virtualElements)
-      console.log(this.DOMElements.slice(1,this.DOMElements.length-1))
+      // console.log("Virtual Elements:",this.virtualElements)
+      // console.log(this.DOMElements.slice(1,this.DOMElements.length-1))
       // console.log("Height", this.virtualElements.before , "Virtual elements before:",this.virtualElements.before.length)
-      let newHeight = (this.virtualElements.before[0].boundries.height * Math.ceil(this.virtualElements.before.length/3)) + "px"
-      // console.log("New height",newHeight)
-      this.before.style.height = newHeight
+      newHeightBefore = (this.virtualElements.before[0].boundries.height * Math.ceil(this.virtualElements.before.length/3)) + "px"
     }
+
+    let newHeightAfter = 0 + "px"
     if(this.virtualElements.after.length > 0){
-      console.log("DOME ELEMENTS:",this.DOMElements)
-      console.log("Height", this.virtualElements.after , "Virtual elements before:",this.virtualElements.after.length)
-      let newHeight = (this.virtualElements.after[0].boundries.height * Math.ceil(this.virtualElements.after.length/3)) + "px"
-      console.log("New height",newHeight)
-      this.after.style.height = newHeight
+      // console.log("DOME ELEMENTS:",this.DOMElements)
+      // console.log("Height", this.virtualElements.after , "Virtual elements before:",this.virtualElements.after.length)
+      newHeightAfter = (this.virtualElements.after[0].boundries.height * Math.ceil(this.virtualElements.after.length/3)) + "px"
+      // console.log("New height",newHeightAfter)
+
     }
+
+    this.after.style.height = newHeightAfter
+    this.before.style.height = newHeightBefore
   }
 
   transmit(){
-    this.update.emit(this.inView.slice(this.virtualElements.before.length,this.inView.length - this.virtualElements.before.length))
+    this.update.emit(this.inView.slice(this.virtualElements.before.length,this.inView.length - this.virtualElements.after.length))
   }
 
 
