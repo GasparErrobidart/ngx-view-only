@@ -99,7 +99,7 @@ export class ViewOnlyDirective {
   }
 
   incrementItemCount(){
-    console.log("DOCUMENT HEIGHT:",this.documentHeight,"VIEW BOTTOM:",this.view.bottom)
+    // console.log("DOCUMENT HEIGHT:",this.documentHeight,"VIEW BOTTOM:",this.view.bottom)
     clearTimeout(this._incrementCountTimeout)
     let offsetToBottom = this.view.height * 0.1
     if(this.view.bottom >= this.documentHeight - offsetToBottom && this.itemCount <= this.elements.length){
@@ -177,24 +177,34 @@ export class ViewOnlyDirective {
     clearTimeout(this._incrementCountTimeout)
     this.virtualElements.visible = []
     this.DOMElements.slice(1,this.DOMElements.length-1).forEach((el,i)=>{
+
+
       let visibility = this.isInView(el)
       if(visibility.vertical == "isAbove"){
-        if(!(this.virtualElements.before.find(el => el.i == i))) this.virtualElements.before.push({ el, i , boundries : visibility.boundries })
+
+
+
+        if(!(this.virtualElements.before.find((el) => el.i == i))) this.virtualElements.before.push({ el, i , boundries : visibility.boundries })
 
         let found = false;
-        this.virtualElements.visible.find(el,index =>{
+        this.virtualElements.visible.find((el,index) =>{
           if(el.i == i) found = index
+          return el.i == i
         })
-        if(found) this.virtualElements.visible.splice(found,1)
+        if(found != false) this.virtualElements.visible.splice(found,1)
+
+
+
 
       }else if(visibility.vertical == "isBeneath"){
-        if(!(this.virtualElements.after.find(el => el.i == i))) this.virtualElements.after.push({ el, i , boundries : visibility.boundries })
+        if(!(this.virtualElements.after.find((el) => el.i == i))) this.virtualElements.after.push({ el, i , boundries : visibility.boundries })
 
         let found = false;
-        this.virtualElements.visible.find(el,index =>{
+        this.virtualElements.visible.find((el,index) =>{
           if(el.i == i) found = index
+          return el.i == i
         })
-        if(found) this.virtualElements.visible.splice(found,1)
+        if(found != false) this.virtualElements.visible.splice(found,1)
 
       }else if(visibility.visible){
         this.virtualElements.visible.push({el,i , boundries : visibility.boundries})
@@ -212,12 +222,12 @@ export class ViewOnlyDirective {
 
 
     if(afterVisibility.boundries.top > -100){
-      console.log("AFTER VISIBLE")
+      // console.log("AFTER VISIBLE")
       if(this.virtualElements.after.length > 0){
         this.virtualElements.after.splice(this.virtualElements.after-3,3)
           .forEach(el => this.virtualElements.visible.push(el))
       }else{
-        console.log("ITEM COUNT",this.itemCount)
+        // console.log("ITEM COUNT",this.itemCount)
         this.itemCount += 1
         this.inView.push(this.elements[this.itemCount-1])
         this._incrementCountTimeout = setTimeout(()=>this.main(),100)
@@ -228,7 +238,7 @@ export class ViewOnlyDirective {
   }
 
   calculatePadding(){
-    console.log("Virtual elements",this.virtualElements)
+    // console.log("Virtual elements",this.virtualElements)
     let newHeightBefore = 0 + "px"
     // console.log("New height",newHeight)
 
@@ -254,7 +264,11 @@ export class ViewOnlyDirective {
   }
 
   transmit(){
-    this.update.emit(this.inView.slice(this.virtualElements.before.length,this.inView.length - this.virtualElements.after.length))
+    let result = this.inView.slice(this.virtualElements.before.length,this.inView.length - this.virtualElements.after.length)
+    console.clear()
+    console.log(this.virtualElements)
+    console.log("Rendering ",result.length," elements.")
+    this.update.emit(result)
   }
 
 
