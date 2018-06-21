@@ -228,6 +228,7 @@ export class ViewOnlyDirective {
           .forEach(el => this.virtualElements.visible.push(el))
       }else{
         // console.log("ITEM COUNT",this.itemCount)
+
         this.itemCount += 1
         this.inView.push(this.elements[this.itemCount-1])
         this._incrementCountTimeout = setTimeout(()=>this.main(),100)
