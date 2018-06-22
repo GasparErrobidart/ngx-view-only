@@ -178,18 +178,18 @@ export class ViewOnlyDirective {
     this.virtualElements.visible = []
     this.DOMElements.slice(1,this.DOMElements.length-1).forEach((el,i)=>{
 
+      let index = i += this.virtualElements.before.length -1
 
       let visibility = this.isInView(el)
       if(visibility.vertical == "isAbove"){
 
 
+        if(!(this.virtualElements.before.find((element) => element.index == index))) this.virtualElements.before.push({ el, index , boundries : visibility.boundries })
 
-        if(!(this.virtualElements.before.find((el) => el.i == i))) this.virtualElements.before.push({ el, i , boundries : visibility.boundries })
-
-        let found = false;
-        this.virtualElements.visible.find((el,index) =>{
-          if(el.i == i) found = index
-          return el.i == i
+        let found = false
+        this.virtualElements.visible.find((element,x) =>{
+          if(element.index == index) found = x
+          return element.index == index
         })
         if(found != false) this.virtualElements.visible.splice(found,1)
 
@@ -197,17 +197,18 @@ export class ViewOnlyDirective {
 
 
       }else if(visibility.vertical == "isBeneath"){
-        if(!(this.virtualElements.after.find((el) => el.i == i))) this.virtualElements.after.push({ el, i , boundries : visibility.boundries })
+
+        if(!(this.virtualElements.after.find((element) => element.index == index))) this.virtualElements.after.push({ el, index , boundries : visibility.boundries })
 
         let found = false;
-        this.virtualElements.visible.find((el,index) =>{
-          if(el.i == i) found = index
-          return el.i == i
+        this.virtualElements.visible.find((element,x) =>{
+          if(element.index == index) found = x
+          return el.index == index
         })
         if(found != false) this.virtualElements.visible.splice(found,1)
 
       }else if(visibility.visible){
-        this.virtualElements.visible.push({el,i , boundries : visibility.boundries})
+        this.virtualElements.visible.push({el, index , boundries : visibility.boundries})
       }
     })
 
