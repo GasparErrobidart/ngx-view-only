@@ -18,6 +18,8 @@ export class ViewOnlyDirective {
   ready : boolean = false
   documentHeight : number
   inView : any = []
+  DOMElements : any[]
+  visible : any[]
   @Input() elements : any = []
   @Output() update = new EventEmitter()
 
@@ -64,8 +66,14 @@ export class ViewOnlyDirective {
     if(this.window){
       this.calculateView()
       this.calculateDocumentHeight()
+      this.updateDOMElements()
       this.selectVisibleElements()
     }
+  }
+
+  updateDOMElements(){
+    this.DOMElements = Array.from(this.list.nativeElement.children)
+    if(this.DOMElements.length > 0) this.DOMElements = this.DOMElements.slice(1,this.DOMElements.length-1)
   }
 
   calculateView(){
@@ -85,7 +93,9 @@ export class ViewOnlyDirective {
   }
 
   selectVisibleElements(){
-    
+    this.visible = this.DOMElements.filter((element)=>{
+      return this.isInView(element).visible
+    })
   }
 
   isInView(element : any){
