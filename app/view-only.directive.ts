@@ -17,7 +17,8 @@ export class ViewOnlyDirective {
   view : any
   ready : boolean = false
   documentHeight : number
-  @Input() elements : any
+  inView : any = []
+  @Input() elements : any = []
   @Output() update = new EventEmitter()
 
   ngOnInit(){
@@ -42,11 +43,28 @@ export class ViewOnlyDirective {
     }
   }
 
+  ngOnChanges(sch){
+    if(sch.hasOwnProperty("elements")){
+      this.assignElements()
+      if(this.ready) this.main()
+    }
+  }
+
+  assignElements(){
+    this.inView = this.elements.map((element , i)=>{
+      return {
+        _localID : i,
+        data : element
+      }
+    })
+  }
+
   @HostListener("window:scroll", ['$event'])
   main(){
     if(this.window){
       this.calculateView()
       this.calculateDocumentHeight()
+      this.selectVisibleElements()
     }
   }
 
@@ -66,12 +84,51 @@ export class ViewOnlyDirective {
     this.documentHeight = Math.max( this.body.scrollHeight, this.body.offsetHeight,this.html.clientHeight, this.html.scrollHeight, this.html.offsetHeight );
   }
 
+  selectVisibleElements(){
+    
+  }
+
+  isInView(element : any){
+
+    let verticalVisibility, horizontalVisibility, boundries = element.getBoundingClientRect()
+
+    if(boundries.bottom >= 0 && boundries.bottom <= this.view.height+element.offsetHeight){
+      verticalVisibility = "isAtCenter"
+    }else if(boundries.bottom >= 0){
+      verticalVisibility = "isBeneath"
+    }else if(boundries.bottom < 0){
+      verticalVisibility = "isAbove"
+    }
+
+    if(boundries.right >= 0 && boundries.right <= this.view.width+element.offsetWidth){
+      horizontalVisibility = "isAtCenter"
+    }else if(boundries.right >= 0){
+      horizontalVisibility = "isNext"
+    }else if(boundries.right < 0){
+      horizontalVisibility = "isBefore"
+    }
+
+    let result = {
+      horizontal : horizontalVisibility,
+      vertical : verticalVisibility,
+      visible : horizontalVisibility=="isAtCenter" && verticalVisibility=="isAtCenter",
+      boundries : boundries
+    }
+
+    return result
+
+  }
 
   /*
     before = row.each(Math.max(element.height))
     visible = elements.visible + offset
     after = row(total - visible - before).each(Math.max(element.height))
     inView = visible
+
+    inView element prototype = {
+      _localID : this.elements.forEach(i),
+      data : this.elements[i]
+    }
   */
 
 
