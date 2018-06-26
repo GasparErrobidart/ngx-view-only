@@ -94,7 +94,9 @@ export class ViewOnlyDirective {
   fillViewPort(){
     console.log("FILL VIEW PORT")
     clearTimeout(this.fillingViewPortTimeout)
-    if(this.isInView(this.after).visible && this.elements.length < this.inView.length){
+    console.log("AFTER",this.after)
+    console.log("AFTER VIEW REPORT",this.isInView(this.after))
+    if(this.isInView(this.after).visible && this.elements.length > this.inView.length){
       console.log("  - AFTER IS IN VIEW")
       this.fillingViewPort = true
       this.addElement(this.elements[this.inView.length],this.inView.length)
@@ -135,7 +137,7 @@ export class ViewOnlyDirective {
     if(this.DOMElements.length > 2){
       let first = this.DOMElements[1]
       let last = this.DOMElements[this.DOMElements.length-2]
-      console.log("FIRST",first)
+      console.log("FIRST",first.attributes)
       let slice = {
         start : first.attributes.find((el)=> el.name == "ViewOnlyIndex").value,
         end   : last.attributes.find((el) => el.name == "ViewOnlyIndex").value
@@ -143,7 +145,11 @@ export class ViewOnlyDirective {
       this.visible  = this.inView.slice(slice.start,slice.end - slice.start)
       this.VEbefore = this.inView.slice(0,slice.start)
       this.VEafter  = this.inView.slice(slice.end,this.inView.length - this.before.length - this.visible.length)
+    }else{
+      this.visible  = this.inView.slice(0,1)
     }
+    console.log("IN VIEW",this.inView)
+    console.log("VISIBLE:",this.visible)
   }
 
   isInView(element : any){
