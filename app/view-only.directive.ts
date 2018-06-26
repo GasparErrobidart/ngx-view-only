@@ -84,6 +84,7 @@ export class ViewOnlyDirective {
   }
 
   addElement(data,i){
+    console.log("ADD ELEMENT")
     this.inView.push({
       _localID : i,
       data : data
@@ -91,18 +92,24 @@ export class ViewOnlyDirective {
   }
 
   fillViewPort(){
+    console.log("FILL VIEW PORT")
     clearTimeout(this.fillingViewPortTimeout)
     if(this.isInView(this.after).visible && this.elements.length < this.inView.length){
+      console.log("  - AFTER IS IN VIEW")
       this.fillingViewPort = true
       this.addElement(this.elements[this.inView.length],this.inView.length)
-      this.fillingViewPortTimeout = setTimeout(()=> this.fillViewPort(),100)
+      this.fillingViewPortTimeout = setTimeout(()=>{
+        this.fillViewPort()
+        this.main()
+      },100)
     }else{
+      console.log("  - AFTER IS NOT IN VIEW")
       this.fillingViewPort = false
-      this.main()
     }
   }
 
   updateDOMElements(){
+    console.log("UPDATING DOM ELEMENTS")
     this.DOMElements = Array.from(this.list.nativeElement.children)
     if(this.DOMElements.length > 2) this.DOMElements = this.DOMElements.slice(1,this.DOMElements.length-2)
   }
@@ -124,9 +131,11 @@ export class ViewOnlyDirective {
   }
 
   selectVisibleElements(){
-    if(this.DOMElements.length > 0){
-      let first = this.DOMElements[0]
-      let last = this.DOMElements[this.DOMElements.length-1]
+    console.log("SELECTING VISIBLE ELEMENTS")
+    if(this.DOMElements.length > 2){
+      let first = this.DOMElements[1]
+      let last = this.DOMElements[this.DOMElements.length-2]
+      console.log("FIRST",first)
       let slice = {
         start : first.attributes.find((el)=> el.name == "ViewOnlyIndex").value,
         end   : last.attributes.find((el) => el.name == "ViewOnlyIndex").value
