@@ -84,7 +84,7 @@ export class ViewOnlyDirective {
   }
 
   addElement(data,i){
-    console.log("ADD ELEMENT")
+    console.log(i,"ADD ELEMENT",data)
     this.inView.push({
       _localID : i,
       data : data
@@ -101,7 +101,6 @@ export class ViewOnlyDirective {
       this.fillingViewPort = true
       this.addElement(this.elements[this.inView.length],this.inView.length)
       this.fillingViewPortTimeout = setTimeout(()=>{
-        this.fillViewPort()
         this.main()
       },100)
     }else{
@@ -142,6 +141,7 @@ export class ViewOnlyDirective {
         start : first.attributes.find((el)=> el.name == "ViewOnlyIndex").value,
         end   : last.attributes.find((el) => el.name == "ViewOnlyIndex").value
       }
+      if(this.isInView(this.after).visible) slice.end++
       this.visible  = this.inView.slice(slice.start,slice.end - slice.start)
       this.VEbefore = this.inView.slice(0,slice.start)
       this.VEafter  = this.inView.slice(slice.end,this.inView.length - this.before.length - this.visible.length)
@@ -186,19 +186,5 @@ export class ViewOnlyDirective {
   transmit(){
     this.update.emit(this.visible)
   }
-
-  /*
-    before = row.each(Math.max(element.height))
-    visible = elements.visible + offset
-    after = row(total - visible - before).each(Math.max(element.height))
-    inView = visible
-
-    inView element prototype = {
-      _localID : this.elements.forEach(i),
-      data : this.elements[i]
-    }
-  */
-
-
 
 }
