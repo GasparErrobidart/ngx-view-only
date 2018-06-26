@@ -1,5 +1,11 @@
 import {
-  Directive
+  Directive,
+  Output,
+  Input,
+  ElementRef,
+  Renderer2,
+  HostListener,
+  EventEmitter
 } from '@angular/core'
 
 @Directive({
@@ -8,9 +14,8 @@ import {
 
 export class ViewOnlyDirective {
 
-
-  before : any
-  after  : any
+  VEbefore : any[] = []
+  VEafter  : any[] = []
   window : any = false
   body : any
   html : any
@@ -19,12 +24,27 @@ export class ViewOnlyDirective {
   documentHeight : number
   inView : any = []
   DOMElements : any[]
-  visible : any[]
+  visible : any[] = []
+  before : any
+  after : any
+  fillingViewPort : boolean = false
+  fillingViewPortTimeout : any
   @Input() elements : any = []
   @Output() update = new EventEmitter()
 
-  ngOnInit(){
+  constructor(
+    private list : ElementRef,
+    private renderer : Renderer2
+  ){
     if(window){
+      this.window = window
+      this.body = document.body
+      this.html = document.documentElement
+    }
+  }
+
+  ngOnInit(){
+    if(this.window){
       const before = document.createElement('div')
       const after = document.createElement('div')
 
@@ -39,41 +59,52 @@ export class ViewOnlyDirective {
       this.before.style.width = "100%"
       this.after.style.width = "100%"
 
-      this.main()
       this.ready = true
-
+      this.main()
     }
   }
 
   ngOnChanges(sch){
     if(sch.hasOwnProperty("elements")){
-      this.assignElements()
+      this.inView = []
       if(this.ready) this.main()
     }
   }
 
-  assignElements(){
-    this.inView = this.elements.map((element , i)=>{
-      return {
-        _localID : i,
-        data : element
-      }
-    })
-  }
-
   @HostListener("window:scroll", ['$event'])
   main(){
-    if(this.window){
+    if(this.window && this.ready){
       this.calculateView()
       this.calculateDocumentHeight()
       this.updateDOMElements()
+      this.fillViewPort()
       this.selectVisibleElements()
+      this.transmit()
+    }
+  }
+
+  addElement(data,i){
+    this.inView.push({
+      _localID : i,
+      data : data
+    })
+  }
+
+  fillViewPort(){
+    clearTimeout(this.fillingViewPortTimeout)
+    if(this.isInView(this.after).visible && this.elements.length < this.inView.length){
+      this.fillingViewPort = true
+      this.addElement(this.elements[this.inView.length],this.inView.length)
+      this.fillingViewPortTimeout = setTimeout(()=> this.fillViewPort(),100)
+    }else{
+      this.fillingViewPort = false
+      this.main()
     }
   }
 
   updateDOMElements(){
     this.DOMElements = Array.from(this.list.nativeElement.children)
-    if(this.DOMElements.length > 0) this.DOMElements = this.DOMElements.slice(1,this.DOMElements.length-1)
+    if(this.DOMElements.length > 2) this.DOMElements = this.DOMElements.slice(1,this.DOMElements.length-2)
   }
 
   calculateView(){
@@ -93,9 +124,17 @@ export class ViewOnlyDirective {
   }
 
   selectVisibleElements(){
-    this.visible = this.DOMElements.filter((element)=>{
-      return this.isInView(element).visible
-    })
+    if(this.DOMElements.length > 0){
+      let first = this.DOMElements[0]
+      let last = this.DOMElements[this.DOMElements.length-1]
+      let slice = {
+        start : first.attributes.find((el)=> el.name == "ViewOnlyIndex").value,
+        end   : last.attributes.find((el) => el.name == "ViewOnlyIndex").value
+      }
+      this.visible  = this.inView.slice(slice.start,slice.end - slice.start)
+      this.VEbefore = this.inView.slice(0,slice.start)
+      this.VEafter  = this.inView.slice(slice.end,this.inView.length - this.before.length - this.visible.length)
+    }
   }
 
   isInView(element : any){
@@ -127,6 +166,10 @@ export class ViewOnlyDirective {
 
     return result
 
+  }
+
+  transmit(){
+    this.update.emit(this.visible)
   }
 
   /*
