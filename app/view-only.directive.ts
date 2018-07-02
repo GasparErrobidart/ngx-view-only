@@ -29,6 +29,7 @@ export class ViewOnlyDirective {
   after : any
   fillingViewPort : boolean = false
   fillingViewPortTimeout : any
+  fillingViewPortBackTimeout : any
   @Input() elements : any = []
   @Output() update = new EventEmitter()
 
@@ -133,6 +134,7 @@ export class ViewOnlyDirective {
   }
 
   selectVisibleElements(){
+    clearTimeout(this.fillingViewPortBackTimeout)
     // console.log("SELECTING VISIBLE ELEMENTS",this.DOMElements)
     if(this.DOMElements.length > 0){
       let first = this.DOMElements[0]
@@ -147,6 +149,12 @@ export class ViewOnlyDirective {
       if(this.fillingViewPort){
         slice.end = this.inView.length-1
         // console.log("Slice end",slice.end)
+      }
+      if(this.isInView(this.before).visible && this.VEbefore.length > 0){
+        slice.start -= 1
+        this.fillingViewPortBackTimeout = setTimeout(()=>{
+          this.main()
+        },100)
       }
       this.visible  = this.inView.slice(slice.start,slice.end)
       this.VEbefore = this.inView.slice(0,slice.start)
