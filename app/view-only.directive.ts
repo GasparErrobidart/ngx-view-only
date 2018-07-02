@@ -81,6 +81,7 @@ export class ViewOnlyDirective {
       this.fillViewPort()
       this.selectVisibleElements()
       this.transmit()
+      this.calculatePadding()
     }
   }
 
@@ -158,7 +159,7 @@ export class ViewOnlyDirective {
       }
       this.visible  = this.inView.slice(slice.start,slice.end)
       this.VEbefore = this.inView.slice(0,slice.start)
-      this.VEafter  = this.inView.slice(slice.end,this.inView.length - this.before.length - this.visible.length)
+      this.VEafter  = this.inView.slice(slice.end,this.inView.length)
     }else{
       this.visible  = this.inView.slice(0,1)
     }
@@ -201,6 +202,16 @@ export class ViewOnlyDirective {
 
   transmit(){
     this.update.emit(this.visible)
+  }
+
+  calculatePadding(){
+    let beforeHeight = 0
+    let afterHeight = 0
+    let aproximatedHeight = this.DOMElements[0].getBoundingClientRect().height
+    if(this.VEbefore.length > 0) beforeHeight = Math.ceil(this.VEbefore.length/3) * aproximatedHeight
+    if(this.VEafter.length > 0) afterHeight = Math.ceil(this.VEafter.length/3) * aproximatedHeight
+    this.before.style.height = beforeHeight + "px"
+    this.after.style.height = afterHeight + "px"
   }
 
 }
