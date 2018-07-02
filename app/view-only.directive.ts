@@ -84,7 +84,7 @@ export class ViewOnlyDirective {
   }
 
   addElement(data,i){
-    console.log(i,"ADD ELEMENT",data)
+    // console.log(i,"ADD ELEMENT",data)
     this.inView.push({
       _localID : i,
       data : data
@@ -92,27 +92,28 @@ export class ViewOnlyDirective {
   }
 
   fillViewPort(){
-    console.log("FILL VIEW PORT")
+    // console.log("FILL VIEW PORT")
     clearTimeout(this.fillingViewPortTimeout)
-    console.log("AFTER",this.after)
-    console.log("AFTER VIEW REPORT",this.isInView(this.after))
+    // console.log("AFTER",this.after)
+    // console.log("AFTER VIEW REPORT",this.isInView(this.after))
     if(this.isInView(this.after).visible && this.elements.length > this.inView.length){
-      console.log("  - AFTER IS IN VIEW")
+      // console.log("  - AFTER IS IN VIEW")
       this.fillingViewPort = true
       this.addElement(this.elements[this.inView.length],this.inView.length)
       this.fillingViewPortTimeout = setTimeout(()=>{
         this.main()
       },100)
     }else{
-      console.log("  - AFTER IS NOT IN VIEW")
+      // console.log("  - AFTER IS NOT IN VIEW")
       this.fillingViewPort = false
     }
   }
 
   updateDOMElements(){
-    console.log("UPDATING DOM ELEMENTS")
+    // console.log("UPDATING DOM ELEMENTS")
     this.DOMElements = Array.from(this.list.nativeElement.children)
-    if(this.DOMElements.length > 2) this.DOMElements = this.DOMElements.slice(1,this.DOMElements.length-2)
+    if(this.DOMElements.length >= 2) this.DOMElements = this.DOMElements.slice(1,this.DOMElements.length-1)
+    this.DOMElements = this.DOMElements.filter((el)=> this.isInView(el).visible )
   }
 
   calculateView(){
@@ -132,24 +133,31 @@ export class ViewOnlyDirective {
   }
 
   selectVisibleElements(){
-    console.log("SELECTING VISIBLE ELEMENTS")
-    if(this.DOMElements.length > 2){
-      let first = this.DOMElements[1]
-      let last = this.DOMElements[this.DOMElements.length-2]
-      console.log("FIRST",first.attributes)
+    // console.log("SELECTING VISIBLE ELEMENTS",this.DOMElements)
+    if(this.DOMElements.length > 0){
+      let first = this.DOMElements[0]
+      let last = this.DOMElements[this.DOMElements.length-1]
+      // console.log("FIRST",first.attributes)
       let slice = {
-        start : first.attributes.find((el)=> el.name == "ViewOnlyIndex").value,
-        end   : last.attributes.find((el) => el.name == "ViewOnlyIndex").value
+        start : parseInt(first.getAttribute("viewonlyindex")),
+        end   : parseInt(last.getAttribute("viewonlyindex"))+1
       }
-      if(this.isInView(this.after).visible) slice.end++
-      this.visible  = this.inView.slice(slice.start,slice.end - slice.start)
+      // console.log("Filling viewport?",this.fillingViewPort)
+      // console.log("SLICE:",slice)
+      if(this.fillingViewPort){
+        slice.end = this.inView.length-1
+        // console.log("Slice end",slice.end)
+      }
+      this.visible  = this.inView.slice(slice.start,slice.end)
       this.VEbefore = this.inView.slice(0,slice.start)
       this.VEafter  = this.inView.slice(slice.end,this.inView.length - this.before.length - this.visible.length)
     }else{
       this.visible  = this.inView.slice(0,1)
     }
-    console.log("IN VIEW",this.inView)
-    console.log("VISIBLE:",this.visible)
+    // console.log("IN VIEW",this.inView)
+    // console.log("VISIBLE:",this.visible)
+    // console.log("BEFORE EL",this.VEbefore)
+    // console.log("AFTER EL",this.VEafter)
   }
 
   isInView(element : any){
