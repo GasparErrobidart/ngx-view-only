@@ -152,14 +152,16 @@ export class ViewOnlyDirective {
         // console.log("Slice end",slice.end)
       }
       if(this.isInView(this.before).visible && this.VEbefore.length > 0){
-        slice.start -= 1
+        slice.start -= 3
         this.fillingViewPortBackTimeout = setTimeout(()=>{
           this.main()
         },100)
       }
+      console.clear()
+      console.log("SLICE",slice,"INVIEW",this.inView.length)
       this.visible  = this.inView.slice(slice.start,slice.end)
       this.VEbefore = this.inView.slice(0,slice.start)
-      this.VEafter  = this.inView.slice(slice.end,this.inView.length)
+      this.VEafter  = this.inView.slice(slice.end,this.inView.length-1)
     }else{
       this.visible  = this.inView.slice(0,1)
     }
@@ -212,6 +214,12 @@ export class ViewOnlyDirective {
     if(this.VEafter.length > 0) afterHeight = Math.ceil(this.VEafter.length/3) * aproximatedHeight
     this.before.style.height = beforeHeight + "px"
     this.after.style.height = afterHeight + "px"
+
+
+    console.log("Rendering:",this.visible.length,"elements")
+
+    console.log("Before:",this.VEbefore.length," - " + beforeHeight + "px")
+    console.log("After:",this.VEafter.length," - " + afterHeight + "px")
   }
 
 }
