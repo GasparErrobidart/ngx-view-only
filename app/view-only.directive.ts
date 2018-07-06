@@ -71,7 +71,7 @@ export class ViewOnlyDirective {
 
   @HostListener("window:scroll", ['$event'])
   main(){
-    // console.clear()
+    console.clear()
     if(this.window && this.ready){
       console.log("Main")
       this.calculateView()
@@ -116,7 +116,7 @@ export class ViewOnlyDirective {
       }
       this.fillingViewPortTimeout = setTimeout(()=>{
         this.main()
-      },10)
+      },1)
     }else{
       // console.log("  - AFTER IS NOT IN VIEW")
       this.fillingViewPort = false
@@ -165,12 +165,11 @@ export class ViewOnlyDirective {
     clearTimeout(this.fillingViewPortBackTimeout)
     let slice = { start : 0 , end : 0 }
 
-    if(this.fillingViewPort){
-      slice.end = this.inView.length
-    }
-
     const splitSections = (slice)=>{
       // VE stands for Virtual Elements
+      if(this.fillingViewPort){
+        slice.end = this.inView.length
+      }
       let afterEnd = this.inView.length-1;
       if(afterEnd < 0) afterEnd = 0
       this.visible  = this.inView.slice(slice.start,slice.end)
@@ -182,10 +181,10 @@ export class ViewOnlyDirective {
     console.log("DOM elements length > 0",this.DOMElements.length > 0)
     console.log("Before visible:", this.isInView(this.before).visible , "After visible:", this.isInView(this.after).visible )
     console.log("VEbefore length > 0",this.VEbefore.length,"VEafter length > 0",this.VEafter.length,"\n\n")
+    console.log("INVIEW:",this.inView)
 
 
-
-    if(this.DOMElements.length > 0 && ((!this.isInView(this.after).visible && !this.isInView(this.before).visible) || (this.VEbefore.length == 0 && this.VEafter.length == 0) ) ){
+    if(this.DOMElements.length > 0 && ((!this.isInView(this.after).visible && !this.isInView(this.before).visible) || (this.VEbefore.length == 0 && this.VEafter.length == 0) || this.fillingViewPort) ){
 
       let first = this.DOMElements[0]
       let last = this.DOMElements[this.DOMElements.length-1]
@@ -201,23 +200,29 @@ export class ViewOnlyDirective {
 
     }else if(this.isInView(this.after).visible && this.VEafter.length > 0){
 
-      slice.start = this.VEafter[0]._localID
-      slice.end = slice.start + 3
+      console.log("--After is visible--")
+
+      slice.start = (this.DOMElements.length > 0) ? parseInt(this.DOMElements[0].getAttribute("viewonlyindex")) : this.VEafter[0]._localID
+      slice.end = (this.DOMElements.length > 0) ? parseInt(this.DOMElements[this.DOMElements.length-1].getAttribute("viewonlyindex"))+4 : slice.start+3
       splitSections(slice)
 
       this.fillingViewPortBackTimeout = setTimeout(()=>{
         this.main()
-      },10)
+      },1)
 
 
     }else if(this.isInView(this.before).visible && this.VEbefore.length > 0){
 
+
+      console.log("--Before is visible--")
+
+
       slice.start = this.VEbefore.length - 3
-      slice.end = this.VEbefore.length
+      slice.end = (this.DOMElements.length > 0) ? parseInt(this.DOMElements[this.DOMElements.length-1].getAttribute("viewonlyindex"))+1 : this.VEbefore.length
       splitSections(slice)
       this.fillingViewPortBackTimeout = setTimeout(()=>{
         this.main()
-      },10)
+      },1)
 
 
 
