@@ -71,9 +71,7 @@ export class ViewOnlyDirective {
 
   @HostListener("window:scroll", ['$event'])
   main(){
-    console.clear()
     if(this.window && this.ready){
-      console.log("Main")
       this.calculateView()
       this.calculateDocumentHeight()
       this.updateDOMElements()
@@ -101,15 +99,7 @@ export class ViewOnlyDirective {
     let isLastVisible = (this.visible.length > 0 && this.VEafter.length == 0)
     let totalElementCount = this.inView.length
 
-    console.log("\n\n\nLOGIC CHECK FILL VIEWPORT:")
-    console.log("After in view:",this.isInView(this.after).visible)
-    console.log("Element length > inView.length",this.elements.length," > ",this.inView.length, "=",this.elements.length > this.inView.length)
-    console.log("Total count  <= 0",totalElementCount)
-    console.log("isLastVisible",isLastVisible, "\n",this.visible.length,this.visible,"\nVEafter.length",this.VEafter.length,this.VEafter)
-
-
     if(this.isInView(this.after).visible && this.elements.length > this.inView.length && (isLastVisible || totalElementCount <= 0) ){
-      console.log("  - AFTER IS IN VIEW")
       this.fillingViewPort = true
       for(let i = 0; i < 3; i ++){
         this.addElement(this.elements[this.inView.length],this.inView.length)
@@ -148,18 +138,6 @@ export class ViewOnlyDirective {
   }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
   selectVisibleElements(){
 
     clearTimeout(this.fillingViewPortBackTimeout)
@@ -177,13 +155,6 @@ export class ViewOnlyDirective {
       this.VEafter  = this.inView.slice(slice.end,afterEnd)
     }
 
-    console.log("\n\nLogic check:")
-    console.log("DOM elements length > 0",this.DOMElements.length > 0)
-    console.log("Before visible:", this.isInView(this.before).visible , "After visible:", this.isInView(this.after).visible )
-    console.log("VEbefore length > 0",this.VEbefore.length,"VEafter length > 0",this.VEafter.length,"\n\n")
-    console.log("INVIEW:",this.inView)
-
-
     if(this.DOMElements.length > 0 && ((!this.isInView(this.after).visible && !this.isInView(this.before).visible) || (this.VEbefore.length == 0 && this.VEafter.length == 0) || this.fillingViewPort) ){
 
       let first = this.DOMElements[0]
@@ -192,15 +163,9 @@ export class ViewOnlyDirective {
         start : parseInt(first.getAttribute("viewonlyindex")),
         end   : parseInt(last.getAttribute("viewonlyindex"))+1
       }
-      console.log("FIRST ",first)
-
       splitSections(slice)
 
-      console.log("SLICE IN",slice)
-
     }else if(this.isInView(this.after).visible && this.VEafter.length > 0){
-
-      console.log("--After is visible--")
 
       slice.start = (this.DOMElements.length > 0) ? parseInt(this.DOMElements[0].getAttribute("viewonlyindex")) : this.VEafter[0]._localID
       slice.end = (this.DOMElements.length > 0) ? parseInt(this.DOMElements[this.DOMElements.length-1].getAttribute("viewonlyindex"))+4 : slice.start+3
@@ -213,10 +178,6 @@ export class ViewOnlyDirective {
 
     }else if(this.isInView(this.before).visible && this.VEbefore.length > 0){
 
-
-      console.log("--Before is visible--")
-
-
       slice.start = this.VEbefore.length - 3
       slice.end = (this.DOMElements.length > 0) ? parseInt(this.DOMElements[this.DOMElements.length-1].getAttribute("viewonlyindex"))+1 : this.VEbefore.length
       splitSections(slice)
@@ -227,30 +188,14 @@ export class ViewOnlyDirective {
 
 
     }else if(this.visible.length + this.VEbefore.length + this.VEafter.length == 0 && this.DOMElements.length == 0){
-      console.log("CUT IN ONE")
       slice.end = 3;
       splitSections(slice)
 
 
 
     }
-    // else if( this.elements.length > this.inView.length && (this.isInView(this.before).visible || this.isInView(this.after).visible) ){
-    //   this.main()
-    // }
 
   }
-
-
-
-
-
-
-
-
-
-
-
-
 
 
   isInView(element : any){
@@ -297,15 +242,7 @@ export class ViewOnlyDirective {
       if(this.VEafter.length > 0) afterHeight = Math.ceil(this.VEafter.length/3) * this.aproximatedHeight
       this.before.style.height = beforeHeight + "px"
       this.after.style.height = afterHeight + "px"
-      console.log("VISIBLE EL:",this.visible)
-      console.log("VIEW:",this.view)
-      console.log("Rendering:",this.visible.length,"elements")
 
-      console.log("Before:",this.VEbefore.length," - " + beforeHeight + "px")
-      console.log("After:",this.VEafter.length," - " + afterHeight + "px")
-
-      console.log("\nBefore in view:",this.isInView(this.before))
-      console.log("After in view:",this.isInView(this.after))
     // }
   }
 
