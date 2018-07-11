@@ -31,6 +31,7 @@ export class ViewOnlyDirective {
   fillingViewPort : boolean = false
   fillingViewPortTimeout : any
   fillingViewPortBackTimeout : any
+  boundriesTimeout : any
   @Input() elements : any = []
   @Output() update = new EventEmitter()
 
@@ -71,6 +72,7 @@ export class ViewOnlyDirective {
 
   @HostListener("window:scroll", ['$event'])
   main(){
+    console.clear()
     if(this.window && this.ready){
       this.calculateView()
       this.calculateDocumentHeight()
@@ -79,6 +81,11 @@ export class ViewOnlyDirective {
       this.selectVisibleElements()
       this.transmit()
       this.calculatePadding()
+      clearTimeout(this.boundriesTimeout)
+      this.boundriesTimeout = setTimeout(()=>{
+        this.setBoundries()
+      },50)
+      console.log(this.inView)
     }
   }
 
@@ -86,6 +93,7 @@ export class ViewOnlyDirective {
     // console.log(i,"ADD ELEMENT",data)
     this.inView.push({
       _localID : i,
+      _inViewData : null,
       data : data
     })
   }
@@ -195,6 +203,12 @@ export class ViewOnlyDirective {
 
     }
 
+  }
+
+  setBoundries(){
+    this.DOMElements.forEach((el)=>{
+      this.inView[parseInt(el.getAttribute("viewonlyindex"))]._inViewData = this.isInView(el)
+    })
   }
 
 
