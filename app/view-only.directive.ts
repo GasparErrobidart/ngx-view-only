@@ -98,6 +98,15 @@ export class ViewOnlyDirective {
     })
   }
 
+  getRows(list : any[]){
+    let rows = {}
+    list.forEach((el)=>{
+      if(!rows.hasOwnProperty(el._inViewData.boundries.top)) rows[el._inViewData.boundries.top] = []
+      rows[el._inViewData.boundries.top].push(el)
+    })
+    return rows
+  }
+
   fillViewPort(){
     // console.log("FILL VIEW PORT")
     clearTimeout(this.fillingViewPortTimeout)
