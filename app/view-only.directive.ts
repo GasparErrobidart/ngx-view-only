@@ -27,6 +27,7 @@ export class ViewOnlyDirective {
   visible : any[] = []
   before : any
   after : any
+  rows : any = {}
   aproximatedHeight : number = 0
   fillingViewPort : boolean = false
   fillingViewPortTimeout : any
@@ -72,8 +73,9 @@ export class ViewOnlyDirective {
 
   @HostListener("window:scroll", ['$event'])
   main(){
-    console.clear()
+    // console.clear()
     if(this.window && this.ready){
+      console.log("Col count",this.colCount())
       this.calculateView()
       this.calculateDocumentHeight()
       this.updateDOMElements()
@@ -84,6 +86,7 @@ export class ViewOnlyDirective {
       clearTimeout(this.boundriesTimeout)
       this.boundriesTimeout = setTimeout(()=>{
         this.setBoundries()
+        this.rows = this.getRows(this.inView)
       },50)
       console.log(this.inView)
     }
@@ -107,6 +110,16 @@ export class ViewOnlyDirective {
     return rows
   }
 
+  rowCount(){
+    return Object.keys(this.rows).length
+  }
+
+  colCount(){
+    let rowPositions = Object.keys(this.rows)
+    if( rowPositions.length < 1 ) return 1
+    return this.rows[ rowPositions[0] ].length
+  }
+
   fillViewPort(){
     // console.log("FILL VIEW PORT")
     clearTimeout(this.fillingViewPortTimeout)
@@ -118,7 +131,7 @@ export class ViewOnlyDirective {
 
     if(this.isInView(this.after).visible && this.elements.length > this.inView.length && (isLastVisible || totalElementCount <= 0) ){
       this.fillingViewPort = true
-      for(let i = 0; i < 3; i ++){
+      for(let i = 0; i < this.colCount(); i ++){
         this.addElement(this.elements[this.inView.length],this.inView.length)
       }
       this.fillingViewPortTimeout = setTimeout(()=>{
@@ -185,7 +198,7 @@ export class ViewOnlyDirective {
     }else if(this.isInView(this.after).visible && this.VEafter.length > 0){
 
       slice.start = (this.DOMElements.length > 0) ? parseInt(this.DOMElements[0].getAttribute("viewonlyindex")) : this.VEafter[0]._localID
-      slice.end = (this.DOMElements.length > 0) ? parseInt(this.DOMElements[this.DOMElements.length-1].getAttribute("viewonlyindex"))+4 : slice.start+3
+      slice.end = (this.DOMElements.length > 0) ? parseInt(this.DOMElements[this.DOMElements.length-1].getAttribute("viewonlyindex"))+ this.colCount()+1 : slice.start+this.colCount()
       splitSections(slice)
 
       this.fillingViewPortBackTimeout = setTimeout(()=>{
@@ -195,7 +208,7 @@ export class ViewOnlyDirective {
 
     }else if(this.isInView(this.before).visible && this.VEbefore.length > 0){
 
-      slice.start = this.VEbefore.length - 3
+      slice.start = this.VEbefore.length - this.colCount()
       slice.end = (this.DOMElements.length > 0) ? parseInt(this.DOMElements[this.DOMElements.length-1].getAttribute("viewonlyindex"))+1 : this.VEbefore.length
       splitSections(slice)
       this.fillingViewPortBackTimeout = setTimeout(()=>{
@@ -205,10 +218,9 @@ export class ViewOnlyDirective {
 
 
     }else if(this.visible.length + this.VEbefore.length + this.VEafter.length == 0 && this.DOMElements.length == 0){
-      slice.end = 3;
+
+      slice.end = this.colCount()
       splitSections(slice)
-
-
 
     }
 
@@ -261,8 +273,8 @@ export class ViewOnlyDirective {
       let beforeHeight = 0
       let afterHeight = 0
       this.aproximatedHeight = (this.DOMElements.length > 0) ? this.DOMElements[0].getBoundingClientRect().height : this.aproximatedHeight
-      if(this.VEbefore.length > 0) beforeHeight = Math.ceil(this.VEbefore.length/3) * this.aproximatedHeight
-      if(this.VEafter.length > 0) afterHeight = Math.ceil(this.VEafter.length/3) * this.aproximatedHeight
+      if(this.VEbefore.length > 0) beforeHeight = Math.ceil(this.VEbefore.length/this.colCount()) * this.aproximatedHeight
+      if(this.VEafter.length > 0) afterHeight = Math.ceil(this.VEafter.length/this.colCount()) * this.aproximatedHeight
       this.before.style.height = beforeHeight + "px"
       this.after.style.height = afterHeight + "px"
 
