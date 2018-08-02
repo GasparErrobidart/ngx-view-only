@@ -139,7 +139,7 @@ export class ViewOnlyDirective {
 
     let isLastVisible = (this.visible.length > 0 && this.VEafter.length == 0)
     let totalElementCount = this.inView.length
-    let unevenRow = ( this.rowCount() >= 1 && (this.inView.length%this.colCount()) )
+    let unevenRow = ( this.rowCount() >= 1 && (this.inView.length%this.colCount() != 0) )
 
     if(this.isInView(this.after).visible && this.elements.length > this.inView.length && (isLastVisible || totalElementCount <= 0) || unevenRow ){
 
