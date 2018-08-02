@@ -112,12 +112,9 @@ export class ViewOnlyDirective {
     let rows = {}
     console.log("In view rows ",list)
     list.forEach((el)=>{
-      console.log(el)
       if(el._inViewData && el._inViewData.boundries){
         if(!rows.hasOwnProperty(el._inViewData.boundries.top)) rows[el._inViewData.boundries.top] = []
         rows[el._inViewData.boundries.top].push(el)
-      }else{
-        setTimeout(()=>{this.main()},1)
       }
     })
     return rows
