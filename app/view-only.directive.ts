@@ -33,6 +33,10 @@ export class ViewOnlyDirective {
   fillingViewPortTimeout : any
   fillingViewPortBackTimeout : any
   boundriesTimeout : any
+
+  _previous : any = { first : null,  last : null , length : 0 }
+  _changedDom : any = { first : false , last : false }
+
   @Input() elements : any = []
   @Output() update = new EventEmitter()
 
@@ -74,26 +78,29 @@ export class ViewOnlyDirective {
   @HostListener("window:scroll", ['$event'])
   main(){
     // console.clear()
+    console.log("\n\n------------------------------------\n\n")
+
     if(this.window && this.ready){
       console.log("Col count",this.colCount())
       this.calculateView()
       this.calculateDocumentHeight()
       this.updateDOMElements()
+      // if(this._changedDom.first || this._changedDom.last){
+        this.setBoundries()
+        this.rows = this.getRows(this.inView)
+      // }
       this.fillViewPort()
+      console.log("Filling viewport",this.fillingViewPort)
       this.selectVisibleElements()
       this.transmit()
       this.calculatePadding()
-      clearTimeout(this.boundriesTimeout)
-      this.boundriesTimeout = setTimeout(()=>{
-        this.setBoundries()
-        this.rows = this.getRows(this.inView)
-      },50)
       console.log(this.inView)
     }
   }
 
   addElement(data,i){
     // console.log(i,"ADD ELEMENT",data)
+    console.log("Adding element ",i)
     this.inView.push({
       _localID : i,
       _inViewData : null,
@@ -103,9 +110,15 @@ export class ViewOnlyDirective {
 
   getRows(list : any[]){
     let rows = {}
+    console.log("In view rows ",list)
     list.forEach((el)=>{
-      if(!rows.hasOwnProperty(el._inViewData.boundries.top)) rows[el._inViewData.boundries.top] = []
-      rows[el._inViewData.boundries.top].push(el)
+      console.log(el)
+      if(el._inViewData && el._inViewData.boundries){
+        if(!rows.hasOwnProperty(el._inViewData.boundries.top)) rows[el._inViewData.boundries.top] = []
+        rows[el._inViewData.boundries.top].push(el)
+      }else{
+        setTimeout(()=>{this.main()},1)
+      }
     })
     return rows
   }
@@ -115,6 +128,7 @@ export class ViewOnlyDirective {
   }
 
   colCount(){
+    console.log("Rows:",this.rows)
     let rowPositions = Object.keys(this.rows)
     if( rowPositions.length < 1 ) return 1
     return this.rows[ rowPositions[0] ].length
@@ -128,12 +142,22 @@ export class ViewOnlyDirective {
 
     let isLastVisible = (this.visible.length > 0 && this.VEafter.length == 0)
     let totalElementCount = this.inView.length
+    let unevenRow = ( this.rowCount() >= 1 && (this.inView.length%this.colCount()) )
 
-    if(this.isInView(this.after).visible && this.elements.length > this.inView.length && (isLastVisible || totalElementCount <= 0) ){
-      this.fillingViewPort = true
-      for(let i = 0; i < this.colCount(); i ++){
-        this.addElement(this.elements[this.inView.length],this.inView.length)
+    if(this.isInView(this.after).visible && this.elements.length > this.inView.length && (isLastVisible || totalElementCount <= 0) || unevenRow ){
+
+
+      if(( (this.fillingViewPort && this._changedDom.last) || !this.fillingViewPort ) || totalElementCount == 0 ){
+        this.fillingViewPort = true
+        let offset = (this.rowCount() > 1) ? this.colCount() : 1
+        if(offset < 1 || (this.rowCount() < 2 && unevenRow)) offset = 1
+        console.log("FILL VIEWPORT, OFFSET:",offset)
+        for(let i = 0; i < offset ; i ++){
+          console.log("For: i",i," < offset",offset)
+          if(this.elements.length > this.inView.length) this.addElement(this.elements[this.inView.length],this.inView.length)
+        }
       }
+
       this.fillingViewPortTimeout = setTimeout(()=>{
         this.main()
       },1)
@@ -148,6 +172,23 @@ export class ViewOnlyDirective {
     this.DOMElements = Array.from(this.list.nativeElement.children)
     if(this.DOMElements.length >= 2) this.DOMElements = this.DOMElements.slice(1,this.DOMElements.length-1)
     this.DOMElements = this.DOMElements.filter((el)=> this.isInView(el).visible )
+
+    if(this.DOMElements.length > 0){
+
+      let first = this.DOMElements[0].getAttribute("viewonlyindex")
+      let last = this.DOMElements[this.DOMElements.length-1].getAttribute("viewonlyindex")
+
+      this._changedDom = {
+        first : first != this._previous.first ,
+        last : last != this._previous.last ,
+        length : this._previous.length != this.DOMElements.length
+      }
+
+      this._previous = { first, last, length : this.DOMElements.length }
+    }
+
+    console.log("DOM CHANGE",this._changedDom)
+
   }
 
   calculateView(){
