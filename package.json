@@ -1,7 +1,7 @@
 {
   "$schema": "./node_modules/ng-packagr/package.schema.json",
   "name": "ngx-view-only",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "ngPackage": {
     "lib": {
       "entryFile": "app/index.ts"

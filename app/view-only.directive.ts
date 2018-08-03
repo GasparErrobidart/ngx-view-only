@@ -37,7 +37,7 @@ export class ViewOnlyDirective {
   resizeTimeout : any
 
   _previous : any = { first : null,  last : null , length : 0 }
-  _changedDom : any = { first : false , last : false }
+  _changedDom : any = { first : false , last : false, length : false }
 
   @Input() elements : any = []
   @Output() update = new EventEmitter()
@@ -71,10 +71,33 @@ export class ViewOnlyDirective {
   }
 
   ngOnChanges(sch){
+    console.log("changes triggeres",sch)
     if(sch.hasOwnProperty("elements")){
-      this.inView = []
-      if(this.ready) this.main()
+
+      this.restart()
+
     }
+  }
+
+  restart(){
+    this.inView = []
+    this.VEbefore = []
+    this.VEafter = []
+    this.DOMElements = []
+    this.visible = []
+    this.rows = {}
+    this.aproximatedHeight = 0
+    this.fillingViewPort = false
+    this._previous = { first : null,  last : null , length : 0 }
+    this._changedDom = { first : false , last : false, length : false }
+    clearTimeout(this.fillingViewPortTimeout)
+    clearTimeout(this.fillingViewPortBackTimeout)
+    clearTimeout(this.boundriesTimeout)
+    clearTimeout(this.resizeTimeout)
+    this.transmit()
+
+    console.log("Restart completed")
+    if(this.ready) setTimeout(()=>{this.main()},10)
   }
 
   @HostListener("window:resize", ['$event'])
