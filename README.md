@@ -29,7 +29,7 @@ import { ViewOnlyDirective } from 'ngx-view-only'
 ...
 ```
 
-### Componentn template example
+### Component template example
 ```
 
 <div viewonly [elements]="ArraySourceList" (update)="viewOnlyList = $event">
