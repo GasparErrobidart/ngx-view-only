@@ -3,7 +3,8 @@ Render only visible DOM nodes within a list of elements.
 
 ## Quick start
 Install and save the module `npm install --save ngx-view-only`.
-Import the module to your project
+
+### Import the module to your project
 ```
 ...
 import { ViewOnlyModule } from 'ngx-view-only'
@@ -17,7 +18,7 @@ import { ViewOnlyModule } from 'ngx-view-only'
 })
 ```
 
-Implement directive in your component
+### Implement directive in your component
 ```
 import { ViewOnlyDirective } from 'ngx-view-only'
 
@@ -28,7 +29,7 @@ import { ViewOnlyDirective } from 'ngx-view-only'
 ...
 ```
 
-Component template:
+### Componentn template example
 ```
 
 <div viewonly [elements]="ArraySourceList" (update)="viewOnlyList = $event">
