@@ -88,10 +88,10 @@ export class ViewOnlyDirective {
   @HostListener("window:scroll", ['$event'])
   main(){
     // console.clear()
-    console.log("\n\n------------------------------------\n\n")
+    // console.log("\n\n------------------------------------\n\n")
 
     if(this.window && this.ready){
-      console.log("Col count",this.colCount())
+      // console.log("Col count",this.colCount())
       this.calculateView()
       this.calculateDocumentHeight()
       this.updateDOMElements()
@@ -100,17 +100,17 @@ export class ViewOnlyDirective {
         this.rows = this.getRows(this.inView)
       // }
       this.fillViewPort()
-      console.log("Filling viewport",this.fillingViewPort)
+      // console.log("Filling viewport",this.fillingViewPort)
       this.selectVisibleElements()
       this.transmit()
       this.calculatePadding()
-      console.log(this.inView)
+      // console.log(this.inView)
     }
   }
 
   addElement(data,i){
     // console.log(i,"ADD ELEMENT",data)
-    console.log("Adding element ",i)
+    // console.log("Adding element ",i)
     this.inView.push({
       _localID : i,
       _inViewData : null,
@@ -120,7 +120,7 @@ export class ViewOnlyDirective {
 
   getRows(list : any[]){
     let rows = {}
-    console.log("In view rows ",list)
+    // console.log("In view rows ",list)
     list.forEach((el)=>{
       if(el._inViewData && el._inViewData.boundries){
         if(!rows.hasOwnProperty(el._inViewData.boundries.top)) rows[el._inViewData.boundries.top] = []
@@ -135,7 +135,7 @@ export class ViewOnlyDirective {
   }
 
   colCount(){
-    console.log("Rows:",this.rows)
+    // console.log("Rows:",this.rows)
     let rowPositions = Object.keys(this.rows)
     if( rowPositions.length < 1 ) return 1
     return this.rows[ rowPositions[0] ].length
@@ -157,9 +157,9 @@ export class ViewOnlyDirective {
         this.fillingViewPort = true
         let offset = (this.rowCount() > 1) ? this.colCount() : 1
         if(offset < 1 ) offset = 1
-        console.log("FILL VIEWPORT, OFFSET:",offset)
+        // console.log("FILL VIEWPORT, OFFSET:",offset)
         for(let i = 0; i < offset ; i ++){
-          console.log("For: i",i," < offset",offset)
+          // console.log("For: i",i," < offset",offset)
           if(this.elements.length > this.inView.length) this.addElement(this.elements[this.inView.length],this.inView.length)
         }
       }
@@ -193,7 +193,7 @@ export class ViewOnlyDirective {
       this._previous = { first, last, length : this.DOMElements.length }
     }
 
-    console.log("DOM CHANGE",this._changedDom)
+    // console.log("DOM CHANGE",this._changedDom)
 
   }
 
@@ -206,7 +206,7 @@ export class ViewOnlyDirective {
       height: this.window.innerHeight,
       width:  this.window.innerWidth
     }
-    console.log("Calculate View",this.window.pageYOffset)
+    // console.log("Calculate View",this.window.pageYOffset)
     return this.view
   }
 
