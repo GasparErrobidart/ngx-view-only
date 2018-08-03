@@ -40,6 +40,11 @@ Component template:
 </div>
 
 ```
+- Add `viewonly` directive
+- Assign the array of elements to the `elements` attribute
+- Assign the processed list provided through the `update` event
+- Generate your elements using the list from the previous step
+- Each item must have a `ViewOnlyIndex` attribute with the `item._localID`
 
 ## TODO
 - Balance uneven rows (The last row)
