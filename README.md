@@ -50,4 +50,5 @@ import { ViewOnlyDirective } from 'ngx-view-only'
 ## TODO
 - Balance uneven rows (The last row)
 - Add support for scrolling elements other than window
+- Fix AOT compatibility
 - Unit tests
