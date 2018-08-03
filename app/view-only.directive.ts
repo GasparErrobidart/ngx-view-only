@@ -71,7 +71,6 @@ export class ViewOnlyDirective {
   }
 
   ngOnChanges(sch){
-    console.log("changes triggeres",sch)
     if(sch.hasOwnProperty("elements")){
 
       this.restart()
@@ -95,8 +94,6 @@ export class ViewOnlyDirective {
     clearTimeout(this.boundriesTimeout)
     clearTimeout(this.resizeTimeout)
     this.transmit()
-
-    console.log("Restart completed")
     if(this.ready) setTimeout(()=>{this.main()},10)
   }
 
