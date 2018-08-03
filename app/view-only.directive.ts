@@ -34,6 +34,8 @@ export class ViewOnlyDirective {
   fillingViewPortBackTimeout : any
   boundriesTimeout : any
 
+  resizeTimeout : any
+
   _previous : any = { first : null,  last : null , length : 0 }
   _changedDom : any = { first : false , last : false }
 
@@ -72,6 +74,14 @@ export class ViewOnlyDirective {
     if(sch.hasOwnProperty("elements")){
       this.inView = []
       if(this.ready) this.main()
+    }
+  }
+
+  @HostListener("window:resize", ['$event'])
+  resize(){
+    if(this.window && this.ready){
+      clearTimeout(this.resizeTimeout)
+      this.resizeTimeout = setTimeout(()=>{this.main()},10)
     }
   }
 
@@ -139,15 +149,14 @@ export class ViewOnlyDirective {
 
     let isLastVisible = (this.visible.length > 0 && this.VEafter.length == 0)
     let totalElementCount = this.inView.length
-    let unevenRow = ( this.rowCount() >= 1 && (this.inView.length%this.colCount() != 0) )
 
-    if(this.isInView(this.after).visible && this.elements.length > this.inView.length && (isLastVisible || totalElementCount <= 0) || unevenRow ){
+    if(this.isInView(this.after).visible && this.elements.length > this.inView.length && (isLastVisible || totalElementCount <= 0) ){
 
 
       if(( (this.fillingViewPort && this._changedDom.last) || !this.fillingViewPort ) || totalElementCount == 0 ){
         this.fillingViewPort = true
         let offset = (this.rowCount() > 1) ? this.colCount() : 1
-        if(offset < 1 || (this.rowCount() < 2 && unevenRow)) offset = 1
+        if(offset < 1 ) offset = 1
         console.log("FILL VIEWPORT, OFFSET:",offset)
         for(let i = 0; i < offset ; i ++){
           console.log("For: i",i," < offset",offset)
