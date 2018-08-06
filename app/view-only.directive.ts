@@ -78,6 +78,7 @@ export class ViewOnlyDirective {
     }
   }
 
+
   restart(){
     this.inView = []
     this.VEbefore = []
@@ -101,7 +102,7 @@ export class ViewOnlyDirective {
   resize(){
     if(this.window && this.ready){
       clearTimeout(this.resizeTimeout)
-      this.resizeTimeout = setTimeout(()=>{this.main()},10)
+      this.resizeTimeout = setTimeout(()=>{this.restart()},10)
     }
   }
 
@@ -150,6 +151,11 @@ export class ViewOnlyDirective {
     return rows
   }
 
+  getLastRow(){
+    let heights : any = Object.keys(this.rows).sort((a,b)=> parseInt(b)-parseInt(a) )
+    return (heights.length > 0) ? this.rows[heights[0]] : null
+  }
+
   rowCount(){
     return Object.keys(this.rows).length
   }
@@ -166,11 +172,12 @@ export class ViewOnlyDirective {
     clearTimeout(this.fillingViewPortTimeout)
     // console.log("AFTER",this.after)
     // console.log("AFTER VIEW REPORT",this.isInView(this.after))
+    let lastRow = this.getLastRow()
 
     let isLastVisible = (this.visible.length > 0 && this.VEafter.length == 0)
     let totalElementCount = this.inView.length
 
-    if(this.isInView(this.after).visible && this.elements.length > this.inView.length && (isLastVisible || totalElementCount <= 0) ){
+    if(this.isInView(this.after).visible && this.elements.length > this.inView.length && (isLastVisible || totalElementCount <= 0) || ( this.rowCount() > 1 && lastRow.length != this.colCount()) ){
 
 
       if(( (this.fillingViewPort && this._changedDom.last) || !this.fillingViewPort ) || totalElementCount == 0 ){

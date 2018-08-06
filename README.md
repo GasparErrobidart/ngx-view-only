@@ -48,7 +48,7 @@ import { ViewOnlyDirective } from 'ngx-view-only'
 - Each item must have a `ViewOnlyIndex` attribute with the `item._localID`
 
 ## TODO
-- Balance uneven rows (The last row)
-- Add support for scrolling elements other than window
 - Fix AOT compatibility
+- Add support for scrolling elements other than window
+- Improve resize
 - Unit tests
